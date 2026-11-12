@@ -1,0 +1,96 @@
+CREATE TABLE IF NOT EXISTS manufacturers (
+ id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, name VARCHAR(120) NOT NULL
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS categories (
+ id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, name VARCHAR(80) NOT NULL, alias VARCHAR(80) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS products (
+ id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ manufacturer_id INT UNSIGNED NOT NULL, category_id INT UNSIGNED NOT NULL,
+ name VARCHAR(160) NOT NULL, alias VARCHAR(160) NOT NULL UNIQUE,
+ short_description VARCHAR(500) NOT NULL, description TEXT NOT NULL,
+ price DECIMAL(10,2) NOT NULL CHECK(price >= 0), image VARCHAR(255) NOT NULL,
+ available BOOLEAN NOT NULL DEFAULT TRUE, vegetarian BOOLEAN NOT NULL DEFAULT FALSE,
+ meta_keywords VARCHAR(255) NOT NULL DEFAULT '', meta_description VARCHAR(500) NOT NULL DEFAULT '', meta_title VARCHAR(160) NOT NULL DEFAULT '',
+ deleted_at DATETIME NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ FOREIGN KEY (manufacturer_id) REFERENCES manufacturers(id), FOREIGN KEY(category_id) REFERENCES categories(id),
+ INDEX product_catalog(category_id,available,deleted_at)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS product_properties (
+ id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, product_id INT UNSIGNED NOT NULL,
+ property_name VARCHAR(80) NOT NULL, property_value VARCHAR(255) NOT NULL,
+ property_price DECIMAL(10,2) NOT NULL DEFAULT 0 CHECK(property_price >= 0),
+ UNIQUE(product_id,property_name), FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS product_images (
+ id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, product_id INT UNSIGNED NOT NULL,
+ image VARCHAR(255) NOT NULL, title VARCHAR(160) NOT NULL,
+ FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS users (
+ id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, name VARCHAR(80) NOT NULL,
+ email VARCHAR(254) NOT NULL UNIQUE, phone VARCHAR(16) NOT NULL UNIQUE,
+ password_hash VARCHAR(100) NOT NULL, role ENUM('user','admin') NOT NULL DEFAULT 'user',
+ blocked BOOLEAN NOT NULL DEFAULT FALSE, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ last_login DATETIME NULL, consent_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ consent_version VARCHAR(30) NOT NULL DEFAULT '2026-10-16'
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS feedback (
+ id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, user_id INT UNSIGNED NULL,
+ author_name VARCHAR(80) NULL, subject VARCHAR(160) NOT NULL, message TEXT NOT NULL,
+ rating TINYINT NULL CHECK(rating BETWEEN 1 AND 5), kind ENUM('message','review') NOT NULL,
+ status ENUM('new','in_progress','resolved') NOT NULL DEFAULT 'new',
+ moderation ENUM('pending','published','rejected') NOT NULL DEFAULT 'pending',
+ response TEXT NULL, is_demo BOOLEAN NOT NULL DEFAULT FALSE,
+ created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL,
+ INDEX feedback_public(kind,moderation,created_at)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS user_sessions (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, user_id INT UNSIGNED NULL,
+ session_token CHAR(64) NOT NULL UNIQUE, csrf_token CHAR(64) NOT NULL,
+ ip_address VARCHAR(64) NOT NULL, user_agent VARCHAR(255) NOT NULL,
+ state JSON NOT NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, expires_at DATETIME NOT NULL,
+ FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE, INDEX session_expiry(expires_at)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS user_actions (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, user_id INT UNSIGNED NOT NULL,
+ action VARCHAR(80) NOT NULL, page VARCHAR(160) NOT NULL DEFAULT '', created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE, INDEX action_user(user_id,created_at)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS cart_items (
+ user_id INT UNSIGNED NOT NULL, product_id INT UNSIGNED NOT NULL,
+ quantity INT NOT NULL CHECK(quantity BETWEEN 1 AND 50), PRIMARY KEY(user_id,product_id),
+ FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE, FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS favorites (
+ user_id INT UNSIGNED NOT NULL, product_id INT UNSIGNED NOT NULL, PRIMARY KEY(user_id,product_id),
+ FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE, FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS orders (
+ id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, user_id INT UNSIGNED NOT NULL,
+ status ENUM('pending','confirmed','ready','completed','cancelled') NOT NULL DEFAULT 'pending',
+ total DECIMAL(12,2) NOT NULL CHECK(total >= 0), customer_name VARCHAR(80) NOT NULL, phone VARCHAR(16) NOT NULL,
+ note VARCHAR(1000) NOT NULL DEFAULT '', idempotency_key VARCHAR(80) NOT NULL,
+ created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE(user_id,idempotency_key),
+ FOREIGN KEY(user_id) REFERENCES users(id), INDEX order_status(status,created_at)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS order_items (
+ id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, order_id INT UNSIGNED NOT NULL,
+ product_id INT UNSIGNED NULL, name VARCHAR(160) NOT NULL, unit_price DECIMAL(10,2) NOT NULL CHECK(unit_price >= 0),
+ quantity INT NOT NULL CHECK(quantity BETWEEN 1 AND 50), FOREIGN KEY(order_id) REFERENCES orders(id) ON DELETE CASCADE,
+ FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS restaurant_settings (
+ id INT PRIMARY KEY, capacity INT NOT NULL CHECK(capacity > 0)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS bookings (
+ id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, user_id INT UNSIGNED NOT NULL,
+ visit_at DATETIME NOT NULL, guests INT NOT NULL CHECK(guests BETWEEN 1 AND 12),
+ table_preference ENUM('any','window','quiet','company') NOT NULL DEFAULT 'any',
+ message VARCHAR(2000) NOT NULL, dinner JSON NOT NULL, customer_name VARCHAR(80) NOT NULL, phone VARCHAR(16) NOT NULL,
+ status ENUM('pending','confirmed','completed','cancelled') NOT NULL DEFAULT 'pending',
+ idempotency_key VARCHAR(80) NOT NULL, UNIQUE(user_id,idempotency_key),
+ created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ FOREIGN KEY(user_id) REFERENCES users(id), INDEX booking_capacity(visit_at,status)
+) ENGINE=InnoDB;

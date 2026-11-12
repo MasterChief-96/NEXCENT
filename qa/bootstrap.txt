@@ -1,0 +1,1 @@
+PASS: bootstrap creates only on empty users, preserves hashes, never promotes existing users, skips when password secret is removed.

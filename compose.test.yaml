@@ -1,0 +1,16 @@
+# Completely separate stack. No production volume or database is referenced here.
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: nexcent_test
+      MYSQL_USER: nexcent_test
+      MYSQL_PASSWORD: local-test-password-only
+      MYSQL_ROOT_PASSWORD: local-root-test-only
+    ports: ["127.0.0.1:3307:3306"]
+    tmpfs: ["/var/lib/mysql"]
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=local-test-password-only mysql -h127.0.0.1 -unexcent_test nexcent_test -e 'SELECT 1' >/dev/null 2>&1"]
+      interval: 3s
+      timeout: 5s
+      retries: 40

@@ -1,0 +1,27 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> nexcent-restaurant@5.2.0 test:load
+> node test/load.mjs
+
+{
+  requests: 100,
+  concurrency: 10,
+  success: 100,
+  errors: 0,
+  statuses: { '200': 100 },
+  rps: 439.07,
+  mean_ms: 21.95,
+  p95_ms: 33.93,
+  max_ms: 67.49
+}
+{
+  requests: 100,
+  concurrency: 50,
+  success: 100,
+  errors: 0,
+  statuses: { '200': 100 },
+  rps: 499.6,
+  mean_ms: 82.18,
+  p95_ms: 149.77,
+  max_ms: 163.97
+}

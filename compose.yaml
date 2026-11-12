@@ -1,0 +1,71 @@
+services:
+  web:
+    build:
+      context: ./deploy/gateway
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_GATE_USER: ${ADMINER_GATE_USER:-dbviewer}
+      ADMINER_GATE_PASSWORD: ${ADMINER_GATE_PASSWORD:?Set ADMINER_GATE_PASSWORD}
+    depends_on:
+      app:
+        condition: service_healthy
+      adminer:
+        condition: service_started
+    restart: unless-stopped
+  app:
+    build: .
+    init: true
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3000
+      APP_ORIGIN: ${APP_ORIGIN:?Set the full HTTPS site URL}
+      TRUST_PROXY: 1
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-nexcent}
+      DB_USER: ${DB_USER:-nexcent}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
+      SEED_DEMO_REVIEWS: ${SEED_DEMO_REVIEWS:-false}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ADMIN_NAME: ${ADMIN_NAME:-Администратор}
+      ADMIN_PHONE: ${ADMIN_PHONE:-}
+      LEGAL_OPERATOR_NAME: ${LEGAL_OPERATOR_NAME:-}
+      LEGAL_OPERATOR_ADDRESS: ${LEGAL_OPERATOR_ADDRESS:-}
+      LEGAL_CONTACT_EMAIL: ${LEGAL_CONTACT_EMAIL:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["sh", "-c", "node scripts/init-db.js && node scripts/bootstrap-admin.js && exec node server/index.js"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 40s
+    restart: unless-stopped
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-nexcent}
+      MYSQL_USER: ${DB_USER:-nexcent}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD}
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci", "--default-time-zone=+00:00"]
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_PASSWORD\" mysql -h127.0.0.1 -u\"$$MYSQL_USER\" \"$$MYSQL_DATABASE\" -e 'SELECT 1' >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    restart: unless-stopped
+  adminer:
+    image: adminer:5-standalone
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    restart: unless-stopped
+volumes:
+  mysql_data:

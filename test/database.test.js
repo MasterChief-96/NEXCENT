@@ -1,0 +1,25 @@
+import test,{after,before} from 'node:test';
+import assert from 'node:assert/strict';
+import {randomUUID,createHash} from 'node:crypto';
+import {readFile} from 'node:fs/promises';
+if(!process.env.DB_NAME?.endsWith('_test'))throw new Error('Dedicated _test database required.');
+const {query,pool,transaction}=await import('../server/db.js');
+after(()=>pool.end());
+let uid;
+before(async()=>{uid=(await query('INSERT INTO users(name,email,phone,password_hash) VALUES(?,?,?,?)',['DB test',randomUUID()+'@example.test','+76'+String(Date.now()).slice(-9),'not-a-real-account-hash'])).insertId;});
+test('expected schema and primary keys exist',async()=>{
+ const expected=['users','user_sessions','user_actions','categories','manufacturers','products','product_images','product_properties','cart_items','favorites','orders','order_items','bookings','feedback','restaurant_settings','schema_migrations'];
+ const tables=await query('SELECT TABLE_NAME name FROM information_schema.TABLES WHERE TABLE_SCHEMA=?',[process.env.DB_NAME]);
+ for(const name of expected)assert.ok(tables.some(t=>t.name===name),name);
+ const keys=await query("SELECT TABLE_NAME name FROM information_schema.TABLE_CONSTRAINTS WHERE CONSTRAINT_SCHEMA=? AND CONSTRAINT_TYPE='PRIMARY KEY'",[process.env.DB_NAME]);
+ for(const name of expected)assert.ok(keys.some(t=>t.name===name),'PK '+name);
+});
+test('migration checksum matches actual SQL',async()=>{const [m]=await query('SELECT checksum FROM schema_migrations WHERE version=?',['001-schema']);assert.equal(m.checksum,createHash('sha256').update(await readFile('sql/001-schema.sql')).digest('hex'));});
+test('UNIQUE email and phone are enforced by database',async()=>{const [u]=await query('SELECT * FROM users WHERE id=?',[uid]);for(const [email,phone] of [[u.email,'+70000000001'],[randomUUID()+'@example.test',u.phone]])await assert.rejects(query('INSERT INTO users(name,email,phone,password_hash) VALUES(?,?,?,?)',['Test',email,phone,'test']),e=>e.code==='ER_DUP_ENTRY');});
+test('NOT NULL enforced',async()=>{await assert.rejects(query('INSERT INTO manufacturers(name) VALUES(NULL)'),e=>e.code==='ER_BAD_NULL_ERROR');});
+test('foreign key rejects nonexistent user',async()=>{await assert.rejects(query('INSERT INTO favorites(user_id,product_id) VALUES(4294967295,1)'),e=>e.code==='ER_NO_REFERENCED_ROW_2');});
+test('CHECK quantity boundaries are enforced',async()=>{for(const n of [0,51])await assert.rejects(query('INSERT INTO cart_items(user_id,product_id,quantity) VALUES(?,1,?)',[uid,n]),e=>[3819,4025].includes(e.errno));});
+test('transaction rolls back all preceding writes on constraint failure',async()=>{const name='rollback-'+randomUUID();await assert.rejects(transaction(async db=>{await query('INSERT INTO manufacturers(name) VALUES(?)',[name],db);await query('INSERT INTO cart_items(user_id,product_id,quantity) VALUES(?,1,0)',[uid],db);}));assert.equal((await query('SELECT id FROM manufacturers WHERE name=?',[name])).length,0);});
+test('transaction commits valid writes',async()=>{const name='commit-'+randomUUID();const mid=await transaction(async db=>(await query('INSERT INTO manufacturers(name) VALUES(?)',[name],db)).insertId);assert.equal((await query('SELECT name FROM manufacturers WHERE id=?',[mid]))[0].name,name);await query('DELETE FROM manufacturers WHERE id=?',[mid]);});
+test('ON DELETE CASCADE removes dependent favorites',async()=>{await query('INSERT INTO favorites(user_id,product_id) VALUES(?,1)',[uid]);await query('DELETE FROM users WHERE id=?',[uid]);assert.equal((await query('SELECT * FROM favorites WHERE user_id=?',[uid])).length,0);});
+test('audit queries find no orphans, duplicates or inconsistent order totals',async()=>{const sql=await readFile('test/sql/audit.sql','utf8');for(const statement of sql.split(';').filter(s=>s.trim())){const rows=await query(statement);assert.deepEqual(rows,[],statement);}});

@@ -1,0 +1,54 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> nexcent-restaurant@5.2.0 test:integration
+> node --import ./scripts/test-env.js --test --test-concurrency=1 test/*.test.js
+
+✔ public catalogue, dynamic HTML and health are available (2103.631207ms)
+✔ anonymous access and ordinary users cannot enter admin API (39.190581ms)
+✔ CSRF and foreign origins are rejected, secure cookie attributes are set (27.122779ms)
+✔ passwords and session identifiers are not stored as plaintext (14.774949ms)
+✔ registration rejects duplicate email, weak password and malformed phone (625.974647ms)
+✔ login by normalized phone works and rotates session; wrong password fails (1251.677138ms)
+✔ profile ownership is enforced and role cannot be escalated by profile update (52.512701ms)
+✔ search uses database, escapes wildcards and stores session history (85.667697ms)
+✔ cart persists per user and invalid quantities/products fail (73.868345ms)
+✔ order takes server price, snapshots items, prevents duplicate submissions (93.502276ms)
+✔ admin order transitions reject skipping and cancel is restricted after confirmation (78.796485ms)
+✔ reviews validate rating, remain private until moderation and exclude demo ratings (100.038744ms)
+✔ booking validates calendar and time, preserves dinner; capacity holds under concurrency (109.694972ms)
+✔ admin product CRUD immediately changes public catalogue and safely archives (130.732284ms)
+✔ favorites are private and removed correctly (42.218452ms)
+✔ password change checks old password, revokes other sessions and rotates CSRF (2044.471106ms)
+✔ blocking revokes sessions and an admin cannot demote themself (60.509405ms)
+✔ logout invalidates session in database (61.798361ms)
+✔ expected schema and primary keys exist (78.158105ms)
+✔ migration checksum matches actual SQL (7.23018ms)
+✔ UNIQUE email and phone are enforced by database (8.029819ms)
+✔ NOT NULL enforced (3.963948ms)
+✔ foreign key rejects nonexistent user (2.000468ms)
+✔ CHECK quantity boundaries are enforced (9.83392ms)
+✔ transaction rolls back all preceding writes on constraint failure (18.939261ms)
+✔ transaction commits valid writes (11.863377ms)
+✔ ON DELETE CASCADE removes dependent favorites (12.126974ms)
+✔ audit queries find no orphans, duplicates or inconsistent order totals (26.089771ms)
+✔ required policy confirmation is rejected before registration or feedback writes (756.7319ms)
+✔ guest cart is saved in its server session and isolated from other guests and accounts (210.807856ms)
+✔ login restores saved cart in a new session without changing password or account (1206.476258ms)
+✔ admin editing preserves custom properties, surcharge, gallery IDs and manufacturer (85.337002ms)
+✔ database initializer preserves existing accounts, hashes, settings and catalogue rows (355.159396ms)
+✔ search length is limited on both the page and API (116.450553ms)
+✔ configured operator details match downloadable policy and are escaped in HTML (33.871528ms)
+✔ HTML has CSP, nosniff and frame protection without server disclosure (100.369906ms)
+✔ source files and secrets are not publicly served (32.666996ms)
+✔ malformed JSON and oversized JSON have controlled responses (20.411397ms)
+✔ SQL injection and XSS strings in search remain data (87.885831ms)
+✔ unknown-account and wrong-password login return the same public error (976.306053ms)
+✔ login rate limit blocks repeated failed attempts (8601.197591ms)
+ℹ tests 41
+ℹ suites 0
+ℹ pass 41
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 25694.476931

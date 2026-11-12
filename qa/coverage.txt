@@ -1,0 +1,102 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> nexcent-restaurant@5.2.0 coverage
+> node --experimental-test-coverage --test-coverage-include=server/validation.js --test-coverage-include=server/domain.js --test-coverage-lines=60 --test-coverage-functions=60 --test-coverage-branches=60 --test test/unit/*.test.js
+
+✔ order total uses kopecks and quantities (4.220724ms)
+✔ empty order sum (0.472142ms)
+✔ server prices calculate the expected order (0.346007ms)
+✔ booking uses Moscow time and accepts exactly one hour ahead (1.205963ms)
+✔ booking invalid instant 2026-11-01 12:30 (1.195834ms)
+✔ booking invalid instant 2026-02-30 18:00 (0.373277ms)
+✔ booking invalid instant 2026-13-01 18:00 (0.326099ms)
+✔ booking invalid instant 2027-03-01 18:00 (0.378126ms)
+✔ booking accepts 90 days boundary, rejects one minute beyond (0.466441ms)
+✔ transition orders pending → confirmed (0.538967ms)
+✔ transition orders pending → completed (0.26773ms)
+✔ transition orders confirmed → ready (0.396761ms)
+✔ transition orders ready → completed (0.306904ms)
+✔ transition bookings confirmed → completed (0.272128ms)
+✔ transition bookings confirmed → ready (0.291355ms)
+✔ transition orders cancelled → pending (0.254836ms)
+✔ transition orders completed → completed (0.958731ms)
+✔ transition orders bad → confirmed (0.523097ms)
+✔ transition users pending → confirmed (0.22445ms)
+✔ HTML escaping neutralizes markup and quotes (0.601944ms)
+✔ HTML escaping handles null and numbers (0.290853ms)
+✔ product card escapes user-visible fields (25.697363ms)
+✔ public user excludes password and blocked metadata (0.424533ms)
+✔ session hash is deterministic SHA256 (1.098903ms)
+✔ auth and admin distinguish anonymous and ordinary users (0.489113ms)
+✔ CSRF accepts matching token, rejects malformed and foreign origin (0.96376ms)
+✔ CSRF skips reads and rejects non-JSON writes (0.408202ms)
+✔ phone normalization: 8 (999) 123-45-67 (8.314271ms)
+✔ phone normalization: +49 151 12345678 (0.686984ms)
+✔ phone normalization: 79991234567 (0.408323ms)
+✔ invalid phone:  (0.701029ms)
+✔ invalid phone: abc (0.463185ms)
+✔ invalid phone: +0123456789 (0.514591ms)
+✔ invalid phone: +123 (0.362437ms)
+✔ invalid phone: +1234567890123456 (1.28975ms)
+✔ registration trims name and normalizes email (10.769497ms)
+✔ registration rejects name (0.789895ms)
+✔ registration rejects email (0.466812ms)
+✔ registration rejects password (0.943852ms)
+✔ registration rejects password_confirm (0.778674ms)
+✔ registration rejects privacy (0.484545ms)
+✔ registration rejects policy (0.373938ms)
+✔ registration rejects terms (0.491368ms)
+✔ profile cannot inject admin role (1.930786ms)
+✔ password UTF-8 byte boundary (0.317584ms)
+✔ invalid ID 0 (1.184743ms)
+✔ invalid ID -1 (0.190687ms)
+✔ invalid ID 1.2 (0.65359ms)
+✔ invalid ID 4294967296 (0.45494ms)
+✔ invalid ID oops (11.613472ms)
+✔ ID string is coerced to integer (0.552663ms)
+✔ cart accepts empty cart and both quantity boundaries (12.809548ms)
+✔ cart quantity rejected 0 (0.424142ms)
+✔ cart quantity rejected -1 (0.450051ms)
+✔ cart quantity rejected 51 (0.135733ms)
+✔ cart quantity rejected 1.5 (0.467794ms)
+✔ cart quantity rejected "2" (0.373618ms)
+✔ cart rejects duplicates and oversized array (0.647069ms)
+✔ product defaults and optional gallery (4.994482ms)
+✔ price rejects 0 (2.572215ms)
+✔ price rejects -1 (0.269493ms)
+✔ price rejects 1.234 (0.239978ms)
+✔ price rejects 1000001 (0.251079ms)
+✔ image rejects ../../.env (0.31078ms)
+✔ image rejects https://external.test/a.png (0.084959ms)
+✔ image rejects assets/a.svg (0.198841ms)
+✔ image rejects assets/a.png" onerror="alert(1) (0.068517ms)
+✔ review requires a rating but message does not (2.111424ms)
+✔ booking default dinner and allowed boundary times (3.585558ms)
+✔ booking rejects time=11:30 (0.335066ms)
+✔ booking rejects time=22:00 (0.132718ms)
+✔ booking rejects time=18:15 (0.087594ms)
+✔ booking rejects guests=0 (0.107952ms)
+✔ booking rejects guests=13 (0.141224ms)
+✔ booking rejects table_preference=roof (0.258623ms)
+✔ booking rejects date=12.12.2026 (1.229146ms)
+✔ booking rejects idempotency_key=short (0.178794ms)
+✔ fail produces an HTTP error (1.856668ms)
+ℹ tests 78
+ℹ suites 0
+ℹ pass 78
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1033.375932
+ℹ start of coverage report
+ℹ ---------------------------------------------------------------
+ℹ file           | line % | branch % | funcs % | uncovered lines
+ℹ ---------------------------------------------------------------
+ℹ server         |        |          |         | 
+ℹ  domain.js     | 100.00 |   100.00 |  100.00 | 
+ℹ  validation.js | 100.00 |   100.00 |  100.00 | 
+ℹ ---------------------------------------------------------------
+ℹ all files      | 100.00 |   100.00 |  100.00 | 
+ℹ ---------------------------------------------------------------
+ℹ end of coverage report

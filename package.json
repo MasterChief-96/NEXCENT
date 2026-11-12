@@ -1,0 +1,42 @@
+{
+  "name": "nexcent-restaurant",
+  "version": "5.2.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "setup": "node scripts/setup.js",
+    "start": "node --env-file-if-exists=.env server/index.js",
+    "dev": "node --watch --env-file-if-exists=.env server/index.js",
+    "db:init": "node --env-file-if-exists=.env scripts/init-db.js",
+    "admin:create": "node --env-file-if-exists=.env scripts/admin.js",
+    "password:reset": "node --env-file-if-exists=.env scripts/admin.js --reset",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:browser": "node --import ./scripts/test-env.js test/browser.cjs",
+    "db:backup": "node --env-file-if-exists=.env scripts/backup.js",
+    "test:unit": "node --test test/unit/*.test.js",
+    "coverage": "node --experimental-test-coverage --test-coverage-include=server/validation.js --test-coverage-include=server/domain.js --test-coverage-lines=60 --test-coverage-functions=60 --test-coverage-branches=60 --test test/unit/*.test.js",
+    "test:integration": "node --import ./scripts/test-env.js --test --test-concurrency=1 test/*.test.js",
+    "test:db": "node --import ./scripts/test-env.js --test test/database.test.js",
+    "test:init": "node --import ./scripts/test-env.js scripts/init-db.js",
+    "start:test": "node scripts/start-test.js",
+    "test:e2e": "node --import ./scripts/test-env.js node_modules/@playwright/test/cli.js test",
+    "test:smoke": "node test/smoke.mjs",
+    "test:load": "node test/load.mjs",
+    "test:browser:firefox": "node --import ./scripts/test-env.js test/browser.cjs firefox"
+  },
+  "dependencies": {
+    "bcryptjs": "3.0.3",
+    "express": "5.3.0",
+    "express-rate-limit": "^8.2.1",
+    "helmet": "^8.1.0",
+    "mysql2": "3.24.6",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "supertest": "^7.2.2",
+    "@playwright/test": "1.64.1"
+  }
+}

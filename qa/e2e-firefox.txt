@@ -1,0 +1,24 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> nexcent-restaurant@5.2.0 test:e2e
+> node --import ./scripts/test-env.js node_modules/@playwright/test/cli.js test --project=firefox
+
+
+Running 7 tests using 1 worker
+
+(node:1589) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [firefox] › test/e2e/quality.spec.js:3:35 › adaptive layout and local resources at 360px (21.1s)
+  ✓  2 [firefox] › test/e2e/quality.spec.js:3:35 › adaptive layout and local resources at 768px (12.6s)
+  ✓  3 [firefox] › test/e2e/quality.spec.js:3:35 › adaptive layout and local resources at 1440px (13.7s)
+  ✓  4 [firefox] › test/e2e/quality.spec.js:19:1 › at least ten distinct internal link destinations resolve (8.2s)
+  ✓  5 [firefox] › test/e2e/quality.spec.js:24:1 › registration form rejects invalid email in browser (3.2s)
+  ✓  6 [firefox] › test/e2e/quality.spec.js:25:1 › mobile menu is keyboard operable (3.0s)
+  ✓  7 [firefox] › test/e2e/quality.spec.js:26:1 › images have alternative text and fields have accessible labels (2.7s)
+
+  7 passed (1.2m)
+
+To open last HTML report run:
+[36m[39m
+[36m  npx playwright show-report[39m
+[36m[39m

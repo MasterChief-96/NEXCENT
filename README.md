@@ -1,6 +1,8 @@
 # Nexcent 5.2: Netrun + Adminer + ЛР4
 
-Начните с **docs/NETRUN_AND_TESTS_RU.md**. Подробная PDF-инструкция выдаётся отдельно.
+Для **Railway** начните с [docs/RAILWAY_RU.md](docs/RAILWAY_RU.md). Команда запуска и healthcheck уже заданы в `railway.json`; MySQL и ссылки DB_* добавляются в панели Railway.
+
+Для **Netrun**: **docs/NETRUN_AND_TESTS_RU.md**. Подробная PDF-инструкция выдаётся отдельно.
 
 - `compose.yaml`: Netrun, публичный сервис `web`, порт `8080`; сайт `/`, БД `/adminer/`.
 - `.env.netrun.example`: список секретов для панели Netrun. Не загружайте заполненные `.env`.
